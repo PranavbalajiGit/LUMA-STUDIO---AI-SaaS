@@ -1,3 +1,4 @@
+import { Footer } from "@/components/Footer";
 import { GalleryShowcaseSection } from "@/components/GalleryShowCaseSection";
 import {HomeHeroSection} from "@/components/HomeHeroSection";
 import { HowItWorksSection } from "@/components/HowItWorksSection";
@@ -11,6 +12,7 @@ export default function Home() {
       <GalleryShowcaseSection />
       <HowItWorksSection />
       <Testimonials />
+      <Footer/>
 
     </main>
   );
