@@ -1,5 +1,6 @@
 import { GalleryShowcaseSection } from "@/components/GalleryShowCaseSection";
 import {HomeHeroSection} from "@/components/HomeHeroSection";
+import { HowItWorksSection } from "@/components/HowItWorksSection";
 
 export default function Home() {
   return (
@@ -7,6 +8,7 @@ export default function Home() {
 
     <HomeHeroSection />
     <GalleryShowcaseSection />
+    <HowItWorksSection />
     </main>
   );
 } 
