@@ -1,3 +1,4 @@
+import { GalleryShowcaseSection } from "@/components/GalleryShowCaseSection";
 import {HomeHeroSection} from "@/components/HomeHeroSection";
 
 export default function Home() {
@@ -5,6 +6,7 @@ export default function Home() {
     <main className="min-h-screen bg-background p-3 sm:p-4 lg:p-5">
 
     <HomeHeroSection />
+    <GalleryShowcaseSection />
     </main>
   );
 } 
