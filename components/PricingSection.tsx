@@ -1,4 +1,4 @@
-// import { clerkPricingAppearance } from "@/lib/clerk-pricing-appearence";
+import { clerkPricingAppearance } from "@/lib/clerk-pricing-appearance";
 import { PricingTable } from "@clerk/nextjs";
 
 export function PricingSection() {
