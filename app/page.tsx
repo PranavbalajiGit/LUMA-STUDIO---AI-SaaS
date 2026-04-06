@@ -2,6 +2,7 @@ import { Footer } from "@/components/Footer";
 import { GalleryShowcaseSection } from "@/components/GalleryShowCaseSection";
 import {HomeHeroSection} from "@/components/HomeHeroSection";
 import { HowItWorksSection } from "@/components/HowItWorksSection";
+import { PricingSection } from "@/components/PricingSection";
 import Testimonials from "@/components/Testimonials";
 
 export default function Home() {
@@ -11,6 +12,7 @@ export default function Home() {
       <HomeHeroSection />
       <GalleryShowcaseSection />
       <HowItWorksSection />
+      <PricingSection />
       <Testimonials />
       <Footer/>
 
