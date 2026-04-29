@@ -115,11 +115,108 @@ export async function POST(request: Request) {
     );
   }
 
+  const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
+  const imageSize = await inferImageSize(imageBuffer);
+
   const prompt = [
     preset.prompt,
     "Do not add extra people, extra limbs, duplicate subjects, or change the overall camera angle.",
   ].join("\n\n");
 
-  
+  try {
+    const result = await Sentry.startSpan(
+      {
+        name: `image edit ${model}`,
+        op: "gen_ai.request",
+        attributes: {
+          "gen_ai.request.model": model,
+          "gen_ai.operation.name": "request",
+          "gen_ai.request.messages": JSON.stringify([
+            { role: "user", content: prompt },
+            { role: "user", content: "[source image attachment omitted]" },
+          ]),
+        },
+      },
+
+      async(span) => {
+
+        const out = await generateImage({
+          model: openaiProvider!.imageModel(model),
+          prompt: {
+            images: [imageBuffer],
+            text: prompt,
+          },
+          size: imageSize,
+          providerOptions: {
+            openai: {
+              input_fidelity: "high", // this means that the input image is used as a reference for the generation,
+              quality: "medium", // this means that the output image is of medium quality
+              output_format: "png",
+              user: userId,
+            },
+          },
+        });
+        
+        const u = out.usage;
+
+        if (u.inputTokens != null) {
+          span.setAttribute("gen_ai.usage.input_tokens", u.inputTokens);
+        }
+
+        if (u.outputTokens != null) {
+          span.setAttribute("gen_ai.usage.output_tokens", u.outputTokens);
+        }
+        if (u.totalTokens != null) {
+          span.setAttribute("gen_ai.usage.total_tokens", u.totalTokens);
+        }
+
+        span.setAttribute(
+          "gen_ai.response.text",
+          JSON.stringify(["[image/png generated; pixel data not sent to Sentry]"]),
+        );
+
+        return out;
+      },
+    );
+
+    const imageBase64 = result.image.base64;
+
+    const resultBuffer = Buffer.from(imageBase64, "base64");
+
+    const { url: resultImageUrl } = await uploadBufferToImageKit({
+      buffer: resultBuffer,
+      fileName: `${preset.slug}-result.png`,
+      folder: `/users/${userId}/results`,
+      mimeType: "image/png",
+    });
+
+    const savedGeneration = await createGeneration({
+      clerkUserId: userId,
+      originalFileName: typeof originalFileName === "string" ? originalFileName : null,
+      sourceImageUrl,
+      resultImageUrl,
+      styleSlug: preset.slug,
+      styleLabel: preset.label,
+      model,
+      promptUsed: prompt,
+    });
+
+    Sentry.logger.info("generation.completed", {
+      generationId: savedGeneration.id,
+      styleSlug: preset.slug,
+      model,
+    });
+
+    return NextResponse.json({
+      imageBase64,
+      mimeType: "image/png",
+      promptUsed: prompt,
+      style: { slug: preset.slug, label: preset.label },
+      model,
+      savedGeneration,
+    });
+  } catch (error) {
+
+  }
 
 }
