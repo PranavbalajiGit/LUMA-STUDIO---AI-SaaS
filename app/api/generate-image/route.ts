@@ -216,7 +216,22 @@ export async function POST(request: Request) {
       savedGeneration,
     });
   } catch (error) {
+        console.error("generate-image route failed", error);
 
-  }
+        if (APICallError.isInstance(error)) {
+            return NextResponse.json(
+                    { error: error.message || "Image generation failed. Please try again." },
+                    { status: error.statusCode ?? 500 },
+                );
+            }
 
+        if (NoImageGeneratedError.isInstance(error)) {
+            return NextResponse.json({ error: "The model did not return an image." }, { status: 502 });
+        }
+
+        return NextResponse.json(
+            { error: "Image generation failed. Please try again." },
+            { status: 500 },
+        );
+    }
 }
